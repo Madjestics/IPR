@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:15rc1-alpine
+    env_file:
+      - .env
+    ports:
+      - $POSTGRES_LOCAL_PORT:$POSTGRES_DOCKER_PORT
+    volumes:
+      - .db-data:/var/lib/postgresql/data
+
+  flyway:
+    image: flyway/flyway:9-alpine
+    command: -locations=filesystem:/flyway/sql -connectRetries=60 migrate
+    env_file:
+      - .env
+    volumes:
+      - ./migration:/flyway/sql
+    depends_on:
+      - postgres
+
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    env_file:
+      - .env
+    ports:
+      - $ZOOKEEPER_LOCAL_PORT:$ZOOKEEPER_DOCKER_PORT
+
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    env_file:
+      - .env
+    ports:
+      - $KAFKA_LOCAL_PORT:$KAFKA_DOCKER_PORT
+    depends_on:
+      - zookeeper
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    env_file:
+      - .env
+    ports:
+      - $RABBITMQ_LOCAL_PORT:$RABBITMQ_DOCKER_PORT
+      - $RABBITMQ_ADMIN_LOCAL_PORT:$RABBITMQ_ADMIN_DOCKER_PORT

@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: WebfluxTest
+
+  r2dbc:
+    url: ${SPRING_R2DBC_URL}
+    username: ${SPRING_R2DBC_USERNAME}
+    password: ${SPRING_R2DBC_PASSWORD}
+
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST}
+    port: ${SPRING_RABBITMQ_PORT}
+    username: ${SPRING_RABBITMQ_USERNAME}
+    password: ${SPRING_RABBITMQ_PASSWORD}
+
+server:
+  port: ${SERVER_PORT}
+
+broker:
+  type: ${BROKER_TYPE}
+
+kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+  topic:
+    movie-events: ${KAFKA_TOPIC_MOVIE_EVENTS}
+    watch-events: ${KAFKA_TOPIC_WATCH_EVENTS}
+
+rabbitmq:
+  exchange:
+    movie: ${RABBITMQ_EXCHANGE_MOVIE}
+  queue:
+    movie: ${RABBITMQ_QUEUE_MOVIE}
+    watch: ${RABBITMQ_QUEUE_WATCH}
+  routing:
+    key:
+      movie: ${RABBITMQ_ROUTING_KEY_MOVIE}
+      watch: ${RABBITMQ_ROUTING_KEY_WATCH}
+
+jwt:
+  secret: ${JWT_SECRET}
