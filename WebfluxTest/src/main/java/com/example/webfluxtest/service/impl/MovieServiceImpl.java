@@ -115,42 +115,47 @@ public class MovieServiceImpl implements MovieService {
     }
 
     private Mono<Void> validate(Movie movie) {
-        if (movie == null) {
-            return Mono.error(new ValidationException("Фильм не может быть null"));
-        }
-        if (!StringUtils.hasText(movie.getTitle())) {
-            return Mono.error(new ValidationException("Названия фильма должно быть не пустым"));
-        }
-        if (movie.getTitle().length()>100) {
-            return Mono.error(new ValidationException("Название фильма должно иметь длину менее 100 символов"));
-        }
-        if (movie.getYear()==null) {
-            return Mono.error(new ValidationException("Год выхода фильма не может быть null"));
-        }
-        if (movie.getYear()<1900 || movie.getYear()>2100) {
-            return Mono.error(new ValidationException("Год выхода фильма должен быть между 1900 и 2100"));
-        }
-        if (movie.getDuration()==null) {
-            return Mono.error(new ValidationException("Длительность фильма не может быть null"));
-        }
-        if (movie.getDuration().isBefore(LocalTime.MIN)) {
-            return Mono.error(new ValidationException("Длительность фильма должна быть больше 0 секунд"));
-        }
-        if (movie.getRating() == null) {
-            return Mono.error(new ValidationException("Рейтинг фильма не может быть null"));
-        }
-        if (movie.getRating()>10 || movie.getRating()<0) {
-            return Mono.error(new ValidationException("Рейтинг фильма должен быть между 0 и 10 баллами"));
-        }
-        if (!StringUtils.hasText(movie.getGenre())) {
-            return Mono.error(new ValidationException("Жанр фильма не может быть пустым"));
-        }
-        if (movie.getDirectorId()==null) {
+        return Mono.just(movie)
+                .flatMap(m -> {
+                    if (m == null) {
+                        return Mono.error(new ValidationException("Фильм не может быть null"));
+                    }
+                    return Mono.empty();
+                })
+                .then(validateLocalFields(movie))
+                .then(validateDirector(movie.getDirectorId()));
+    }
+
+    private Mono<Void> validateLocalFields(Movie movie) {
+        return Mono.defer(() -> {
+            if (!StringUtils.hasText(movie.getTitle())) {
+                return Mono.error(new ValidationException("Названия фильма должно быть не пустым"));
+            }
+            if (movie.getTitle().length() > 100) {
+                return Mono.error(new ValidationException("Название фильма должно иметь длину менее 100 символов"));
+            }
+            if (movie.getYear() == null || movie.getYear() < 1900 || movie.getYear() > 2100) {
+                return Mono.error(new ValidationException("Год выхода фильма должен быть между 1900 и 2100"));
+            }
+            if (movie.getDuration() == null || movie.getDuration().isBefore(LocalTime.MIN)) {
+                return Mono.error(new ValidationException("Длительность фильма должна быть больше 0 секунд"));
+            }
+            if (movie.getRating() == null || movie.getRating() < 0 || movie.getRating() > 10) {
+                return Mono.error(new ValidationException("Рейтинг фильма должен быть между 0 и 10 баллами"));
+            }
+            if (!StringUtils.hasText(movie.getGenre())) {
+                return Mono.error(new ValidationException("Жанр фильма не может быть пустым"));
+            }
+            return Mono.empty();
+        });
+    }
+
+    private Mono<Void> validateDirector(Long directorId) {
+        if (directorId == null) {
             return Mono.error(new ValidationException("Режиссера фильма не может быть пустым"));
         }
-        return directorRepository.findById(movie.getDirectorId())
+        return directorRepository.findById(directorId)
                 .switchIfEmpty(Mono.error(new EntityNotFoundException("Директор фильма не найден")))
-                .onErrorResume(Mono::error)
                 .then();
     }
 }

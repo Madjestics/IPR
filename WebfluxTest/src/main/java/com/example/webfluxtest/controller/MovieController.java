@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,6 +30,7 @@ public class MovieController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public Flux<MovieDto> findAll() {
         return movieService.findAll()
                 .map(movieMapper::map);
@@ -36,6 +38,7 @@ public class MovieController {
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public Mono<MovieDto> findById(@PathVariable(name = "id") Long id) {
         return movieService.findById(id)
                 .map(movieMapper::map);
@@ -43,6 +46,7 @@ public class MovieController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Mono<MovieDto> addMovie(@RequestBody MovieDto dto) {
         return movieService.add(movieMapper.map(dto))
                 .onErrorResume(Mono::error)
@@ -51,6 +55,7 @@ public class MovieController {
 
     @PatchMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Mono<MovieDto> updateMovie(@RequestBody MovieDto dto, @PathVariable Long id) {
         return movieService.update(movieMapper.map(dto), id)
                 .onErrorResume(Mono::error)
@@ -59,16 +64,19 @@ public class MovieController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Mono<Void> deleteMovie(@PathVariable Long id) {
         return movieService.delete(id);
     }
 
     @PostMapping("upload/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Mono<Long> uploadMovie(@RequestPart("movie") Mono<FilePart> filePartMono, @PathVariable Long id) {
         return movieService.uploadMovie(filePartMono, id);
     }
 
     @GetMapping(value = "/watch/{id}", produces = "video/mp4")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public Mono<Resource> watchMovie(@PathVariable Long id) {
         return movieService.getForWatching(id);
     }

@@ -5,6 +5,7 @@ import com.example.webfluxtest.mapper.DirectorMapper;
 import com.example.webfluxtest.service.DirectorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,6 +26,7 @@ public class DirectorController {
     private final DirectorMapper directorMapper;
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public Flux<DirectorDto> findAll() {
         return directorService.findAll()
@@ -32,6 +34,7 @@ public class DirectorController {
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public Mono<DirectorDto> findById(@PathVariable(name = "id") Long id) {
         return directorService.findById(id)
@@ -40,6 +43,7 @@ public class DirectorController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Mono<DirectorDto> addDirector(@RequestBody DirectorDto dto) {
         return directorService.add(directorMapper.map(dto))
                 .onErrorResume(Mono::error)
@@ -48,6 +52,7 @@ public class DirectorController {
 
     @PatchMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Mono<DirectorDto> updateDirector(@RequestBody DirectorDto dto, @PathVariable(name = "id") Long id) {
         return directorService.update(directorMapper.map(dto), id)
                 .onErrorResume(Mono::error)
@@ -56,6 +61,7 @@ public class DirectorController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Mono<Void> deleteDirector(@PathVariable(name = "id") Long id) {
         return directorService.delete(id);
     }

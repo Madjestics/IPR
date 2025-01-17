@@ -22,7 +22,7 @@
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>
-            <artifactId>CommonWebFlux</artifactId>
+            <artifactId>CommonTest</artifactId>
             <version>${common.version}</version>
         </dependency>
 

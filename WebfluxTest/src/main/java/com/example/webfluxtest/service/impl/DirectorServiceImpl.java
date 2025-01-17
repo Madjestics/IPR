@@ -70,12 +70,14 @@ public class DirectorServiceImpl implements DirectorService {
     }
 
     private Mono<Void> validate(Director director) {
-        if (director == null) {
-            return Mono.error(new ValidationException("Режиссер не может быть null"));
-        }
-        if (director.getFio()==null || !StringUtils.hasText(director.getFio())) {
-            return Mono.error(new ValidationException("ФИО режиссера не может быть пустым"));
-        }
-        return Mono.empty();
+        return Mono.defer(() -> {
+            if (director == null) {
+                return Mono.error(new ValidationException("Режиссер не может быть null"));
+            }
+            if (!StringUtils.hasText(director.getFio())) {
+                return Mono.error(new ValidationException("ФИО режиссера не может быть пустым"));
+            }
+            return Mono.empty();
+        });
     }
 }
